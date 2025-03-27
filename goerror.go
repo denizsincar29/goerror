@@ -5,15 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type LogLevel int
-
-const (
-	DEBUG LogLevel = iota
-	INFO
-	WARNING
-	ERROR
-)
-
 // Error struct
 type Error struct {
 	// last error
@@ -42,6 +33,7 @@ func (e *Error) Must(err error, args ...string) {
 
 // Check takes a error and logs it if it is not nil
 func (e *Error) Check(err error, args ...string) {
+	e.lastError = err
 	if err != nil {
 		if len(args) > 0 {
 			e.logger.Errorln(args[0], err.Error())
@@ -53,6 +45,7 @@ func (e *Error) Check(err error, args ...string) {
 
 // warn takes a error and logs it if it is not nil
 func (e *Error) Warn(err error, args ...string) {
+	e.lastError = err
 	if err != nil {
 		if len(args) > 0 {
 			e.logger.Warnln(args[0], err.Error())
@@ -64,6 +57,7 @@ func (e *Error) Warn(err error, args ...string) {
 
 // Info takes a error and logs it if it is not nil
 func (e *Error) Info(err error, args ...string) {
+	e.lastError = err
 	// this function is used in rare cases
 	if err != nil {
 		if len(args) > 0 {
@@ -76,6 +70,7 @@ func (e *Error) Info(err error, args ...string) {
 
 // Debug takes a error and logs it if it is not nil
 func (e *Error) Debug(err error, args ...string) {
+	e.lastError = err
 	// this function is used in rare cases
 	if err != nil {
 		if len(args) > 0 {
@@ -84,4 +79,14 @@ func (e *Error) Debug(err error, args ...string) {
 			e.logger.Debugln(err.Error())
 		}
 	}
+}
+
+// IsError returns true if the last error is not nil
+func (e *Error) IsError() bool {
+	return e.lastError != nil
+}
+
+// E alias for iserror
+func (e *Error) E() bool {
+	return e.IsError()
 }
