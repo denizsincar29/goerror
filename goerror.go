@@ -2,23 +2,26 @@
 package goerror
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
+	"log/slog"
+	"os"
 )
 
 // Error struct
 type Error struct {
 	// last error
 	lastError error
-	// logrus logger
-	logger *logrus.Logger
+	// slogger
+	logger *slog.Logger
 }
 
 // NewError creates a new Error struct
-func NewError(logger *logrus.Logger) *Error {
+func NewError(logger *slog.Logger) *Error {
 	e := new(Error)
 	if logger == nil {
-		logger = logrus.New()
-		logger.SetLevel(logrus.DebugLevel)
+		// create a new logger with default settings
+		logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+		logger.Info("Don't do this! Use your own logger")
 	}
 	e.logger = logger
 	return e
@@ -28,9 +31,9 @@ func NewError(logger *logrus.Logger) *Error {
 func (e *Error) Must(err error, args ...string) {
 	if err != nil {
 		if len(args) > 0 {
-			e.logger.Fatalln(args[0], err.Error())
+			panic(fmt.Sprintf("%s: %s", args[0], err.Error()))
 		} else {
-			e.logger.Fatalln(err.Error())
+			panic(err.Error())
 		}
 	}
 }
@@ -40,9 +43,9 @@ func (e *Error) Check(err error, args ...string) {
 	e.lastError = err
 	if err != nil {
 		if len(args) > 0 {
-			e.logger.Errorln(args[0], err.Error())
+			e.logger.Error(args[0], err.Error())
 		} else {
-			e.logger.Errorln(err.Error())
+			e.logger.Error(err.Error())
 		}
 	}
 }
@@ -52,9 +55,9 @@ func (e *Error) Warn(err error, args ...string) {
 	e.lastError = err
 	if err != nil {
 		if len(args) > 0 {
-			e.logger.Warnln(args[0], err.Error())
+			e.logger.Warn(args[0], err.Error())
 		} else {
-			e.logger.Warnln(err.Error())
+			e.logger.Warn(err.Error())
 		}
 	}
 }
@@ -65,9 +68,9 @@ func (e *Error) Info(err error, args ...string) {
 	// this function is used in rare cases
 	if err != nil {
 		if len(args) > 0 {
-			e.logger.Infoln(args[0], err.Error())
+			e.logger.Info(args[0], err.Error())
 		} else {
-			e.logger.Infoln(err.Error())
+			e.logger.Info(err.Error())
 		}
 	}
 }
@@ -78,9 +81,9 @@ func (e *Error) Debug(err error, args ...string) {
 	// this function is used in rare cases
 	if err != nil {
 		if len(args) > 0 {
-			e.logger.Debugln(args[0], err.Error())
+			e.logger.Debug(args[0], err.Error())
 		} else {
-			e.logger.Debugln(err.Error())
+			e.logger.Debug(err.Error())
 		}
 	}
 }
