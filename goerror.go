@@ -16,6 +16,10 @@ type Error struct {
 // NewError creates a new Error struct
 func NewError(logger *logrus.Logger) *Error {
 	e := new(Error)
+	if logger == nil {
+		logger = logrus.New()
+		logger.SetLevel(logrus.DebugLevel)
+	}
 	e.logger = logger
 	return e
 }
